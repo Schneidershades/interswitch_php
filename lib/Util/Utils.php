@@ -16,7 +16,7 @@ class Utils {
     }
 
     static function generateTimestamp() {
-        $date = new DateTime(null, new DateTimeZone(Constants::LAGOS_TIME_ZONE));
+        $date = new \DateTime(null, new \DateTimeZone(Constants::LAGOS_TIME_ZONE));
         return $date->getTimestamp();
     }
 
@@ -27,15 +27,15 @@ class Utils {
         $encodedUrl = urlencode($resourceUrl);
 
         $signatureCipher = $httpMethod . '&' . $encodedUrl . '&' . $timestamp . '&' . $nonce . '&' . $clientId . '&' . $clientSecretKey;
+        echo 'Cipher>>> ' . $signatureCipher;
 
         if (!empty($transactionParams) && is_array($transactionParams)) {
             $parameters = implode("&", $transactionParams);
             $signatureCipher = $signatureCipher . $parameters;
         }
 
-        $signature = hash('sha256', $signatureCipher);
-
-        return base64_encode($signature);
+        $signature = base64_encode(sha1($signatureCipher, true));
+        return $signature;
     }
 
     static function generateAccessToken($clientId, $clientSecret, $passortUrl) {
@@ -47,8 +47,6 @@ class Utils {
             'Content-Type: ' . $content_type,
             'Authorization: ' . $authorization
         ];
-
-        echo "headers>>> " . $headers;
 
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $passortUrl);
@@ -70,32 +68,39 @@ class Utils {
         $response[Constants::RESPONSE_BODY] = $curl_response;
 
         curl_close($curl);
-
+        
         return $response;
     }
 
-    static function doREST($content_type, $authorization, $signatureMethod, $signature, $timestamp, $nonce, $resourceUrl, $request) {
+    static function doREST($headers, $httpMethod, $resourceUrl, $request) {
         $response = Array();
-
-        $headers = [
-            'Content-Type: ' . $content_type,
-            'Authorization: ' . $authorization,
-            'SignatureMethod: ' . $signatureMethod,
-            'Signature: ' . $signature,
-            'Timestamp: ' . $timestamp,
-            'Nonce: ' . $nonce
-        ];
-
-        echo $headers;
-        echo $request;
-
+        
         $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $resourceUrl);
+        
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_POST, true);
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $request);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+        if ($httpMethod == 'DELETE') {
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'DELETE');
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $request);
+        }
 
+        if ($httpMethod == 'POST') {
+            curl_setopt($curl, CURLOPT_POST, TRUE);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $request);
+        }
+
+        if ($httpMethod == 'PUT') {
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'PUT');
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $request);
+        }
+        
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($curl, CURLOPT_URL, $resourceUrl);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+
+        print_r($headers);
+        print_r($request);
+        print_r($resourceUrl);
+        
         $curl_response = curl_exec($curl);
         $info = curl_getinfo($curl);
         if ($curl_response === false) {
@@ -109,6 +114,7 @@ class Utils {
 
         curl_close($curl);
 
+        print_r($response);
         return $response;
     }
 

@@ -30,32 +30,90 @@ class Interswitch {
         }
     }
 
-    static function send($uri, $httpMethod, $data) {
+    function send($uri, $httpMethod, $data, $headers = null, $signedParameters = null) {
         $this->nonce = Utils::generateNonce();
         $this->timestamp = Utils::generateTimestamp();
         $this->signatureMethod = Constants::SIGNATURE_METHOD_VALUE;
-        $this->signature = Utils::generateSignature($this->clientId, $this->clientSecret, $uri, $httpMethod, $this->timestamp, $this->nonce, NULL);
+
         if ($this->environment === NULL) {
-            $passportUrl = Constants::SANDBOX_BASE_URL . Constants::PASSPORT_RESOURCE_URL;
+//            $passportUrl = Constants::SANDBOX_BASE_URL . Constants::PASSPORT_RESOURCE_URL;
+            $passportUrl = Constants::PASSPORT_RESOURCE_URL;
+
             $uri = Constants::SANDBOX_BASE_URL . $uri;
         } else {
             $passportUrl = Constants::PRODUCTION_BASE_URL . Constants::PASSPORT_RESOURCE_URL;
             $uri = Constants::PRODUCTION_BASE_URL . $uri;
         }
-
-        $passportResponse = Utils::generateAccessToken($this->clientId, $this->clientSecret, $passortUrl);
+        $this->signature = Utils::generateSignature($this->clientId, $this->clientSecret, $uri, $httpMethod, $this->timestamp, $this->nonce, $signedParameters);
+        
+        $passportResponse = Utils::generateAccessToken($this->clientId, $this->clientSecret, $passportUrl);
         if ($passportResponse[Constants::HTTP_CODE] === 200) {
             $this->accessToken = json_decode($passportResponse[Constants::RESPONSE_BODY], true)['access_token'];
         } else {
             return $passportResponse;
         }
 
-        $response = Utils::doREST(Constants::CONTENT_TYPE, $this->accessToken, $this->signatureMethod, $this->signature, $this->timestamp, $this->nonce, $uri, $data);
+        $authorization = 'Bearer ' . $this->accessToken;
+
+        $constantHeaders = [
+            'Content-Type: ' . Constants::CONTENT_TYPE,
+            'Authorization: ' . $authorization,
+            'SignatureMethod: ' . $this->signatureMethod,
+            'Signature: ' . $this->signature,
+            'Timestamp: ' . $this->timestamp,
+            'Nonce: ' . $this->nonce
+        ];
+
+
+        if ($headers !== null && is_array($headers)) {
+            $requestHeaders = array_merge($headers, $constantHeaders);
+            $response = Utils::doREST($requestHeaders, $httpMethod, $uri, $data);
+        } else {
+            $response = Utils::doREST($constantHeaders, $httpMethod, $uri, $data);
+        }
 
         return $response;
     }
 
-    static function getAuthData($publicCertPath, $version, $pan, $expDate, $cvv, $pin) {
+    function sendWithAccessToken($uri, $httpMethod, $data, $accessToken, $headers = null, $signedParameters = null) {
+        $this->nonce = Utils::generateNonce();
+        $this->timestamp = Utils::generateTimestamp();
+        $this->signatureMethod = Constants::SIGNATURE_METHOD_VALUE;
+
+        if ($this->environment === NULL) {
+//            $passportUrl = Constants::SANDBOX_BASE_URL . Constants::PASSPORT_RESOURCE_URL;
+            $passportUrl = Constants::PASSPORT_RESOURCE_URL;
+
+            $uri = Constants::SANDBOX_BASE_URL . $uri;
+        } else {
+            $passportUrl = Constants::PRODUCTION_BASE_URL . Constants::PASSPORT_RESOURCE_URL;
+            $uri = Constants::PRODUCTION_BASE_URL . $uri;
+        }
+        $this->signature = Utils::generateSignature($this->clientId, $this->clientSecret, $uri, $httpMethod, $this->timestamp, $this->nonce, $signedParameters);
+
+        $authorization = 'Bearer ' . $accessToken;
+
+        $constantHeaders = [
+            'Content-Type: ' . Constants::CONTENT_TYPE,
+            'Authorization: ' . $authorization,
+            'SignatureMethod: ' . $this->signatureMethod,
+            'Signature: ' . $this->signature,
+            'Timestamp: ' . $this->timestamp,
+            'Nonce: ' . $this->nonce
+        ];
+
+
+        if ($headers !== null && is_array($headers)) {
+            $requestHeaders = array_merge($headers, $constantHeaders);
+            $response = Utils::doREST($requestHeaders, $httpMethod, $uri, $data);
+        } else {
+            $response = Utils::doREST($constantHeaders, $httpMethod, $uri, $data);
+        }
+
+        return $response;
+    }
+
+    function getAuthData($publicCertPath, $version, $pan, $expDate, $cvv, $pin) {
         $authDataCipher = $version . 'Z' . $pan . 'Z' . $pin . 'Z' . $expDate . 'Z' . $cvv;
 
         $fp = fopen($publicCertPath, "r");
@@ -64,7 +122,9 @@ class Interswitch {
 
         openssl_public_encrypt($authDataCipher, $encryptedData, $pub_key);
 
-        return(base64_encode($encryptedData));
+        $authData = base64_encode($encryptedData);
+
+        return $authData;
     }
 
     function getAccessToken() {
