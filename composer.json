@@ -1,0 +1,11 @@
+{
+    "name": "interswitch/interswitch-php",
+    "description": "Interswitch PHP Library",
+    "authors": [
+        {
+            "name": "Techquest",
+            "email": "techquest@interswitchgroup.com"
+        }
+    ],
+    "require": {}
+}
