@@ -10,6 +10,8 @@ namespace Interswitch;
 
 include_once 'Util\Utils.php';
 include_once 'Util\Constants.php';
+include_once 'Util\HttpClient.php';
+
 
 class Interswitch {
 
@@ -67,9 +69,9 @@ class Interswitch {
 
         if ($headers !== null && is_array($headers)) {
             $requestHeaders = array_merge($headers, $constantHeaders);
-            $response = Utils::doREST($requestHeaders, $httpMethod, $uri, $data);
+            $response = HttpClient::send($requestHeaders, $httpMethod, $uri, $data);
         } else {
-            $response = Utils::doREST($constantHeaders, $httpMethod, $uri, $data);
+            $response = HttpClient::send($constantHeaders, $httpMethod, $uri, $data);
         }
 
         return $response;
@@ -105,9 +107,9 @@ class Interswitch {
 
         if ($headers !== null && is_array($headers)) {
             $requestHeaders = array_merge($headers, $constantHeaders);
-            $response = Utils::doREST($requestHeaders, $httpMethod, $uri, $data);
+            $response = HttpClient::send($requestHeaders, $httpMethod, $uri, $data);
         } else {
-            $response = Utils::doREST($constantHeaders, $httpMethod, $uri, $data);
+            $response = HttpClient::send($constantHeaders, $httpMethod, $uri, $data);
         }
 
         return $response;
