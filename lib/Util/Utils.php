@@ -27,7 +27,6 @@ class Utils {
         $encodedUrl = urlencode($resourceUrl);
 
         $signatureCipher = $httpMethod . '&' . $encodedUrl . '&' . $timestamp . '&' . $nonce . '&' . $clientId . '&' . $clientSecretKey;
-        echo 'Cipher>>> ' . $signatureCipher;
 
         if (!empty($transactionParams) && is_array($transactionParams)) {
             $parameters = implode("&", $transactionParams);
@@ -54,6 +53,7 @@ class Utils {
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_POSTFIELDS, "grant_type=client_credentials&scope=profile");
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 
         $curl_response = curl_exec($curl);
         $info = curl_getinfo($curl);

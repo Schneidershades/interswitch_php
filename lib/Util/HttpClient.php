@@ -40,10 +40,6 @@ class HttpClient {
         curl_setopt($curl, CURLOPT_URL, $resourceUrl);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 
-        print_r($headers);
-        print_r($request);
-        print_r($resourceUrl);
-
         $curl_response = curl_exec($curl);
         $info = curl_getinfo($curl);
         if ($curl_response === false) {
@@ -57,7 +53,6 @@ class HttpClient {
 
         curl_close($curl);
 
-        print_r($response);
         return $response;
     }
 
