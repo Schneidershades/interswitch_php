@@ -12,7 +12,6 @@ include_once 'Util\Utils.php';
 include_once 'Util\Constants.php';
 include_once 'Util\HttpClient.php';
 
-
 class Interswitch {
 
     private $clientId;
@@ -38,16 +37,14 @@ class Interswitch {
         $this->signatureMethod = Constants::SIGNATURE_METHOD_VALUE;
 
         if ($this->environment === NULL) {
-//            $passportUrl = Constants::SANDBOX_BASE_URL . Constants::PASSPORT_RESOURCE_URL;
-            $passportUrl = Constants::PASSPORT_RESOURCE_URL;
-
+            $passportUrl = Constants::SANDBOX_BASE_URL . Constants::PASSPORT_RESOURCE_URL;
             $uri = Constants::SANDBOX_BASE_URL . $uri;
         } else {
             $passportUrl = Constants::PRODUCTION_BASE_URL . Constants::PASSPORT_RESOURCE_URL;
             $uri = Constants::PRODUCTION_BASE_URL . $uri;
         }
         $this->signature = Utils::generateSignature($this->clientId, $this->clientSecret, $uri, $httpMethod, $this->timestamp, $this->nonce, $signedParameters);
-        
+
         $passportResponse = Utils::generateAccessToken($this->clientId, $this->clientSecret, $passportUrl);
         if ($passportResponse[Constants::HTTP_CODE] === 200) {
             $this->accessToken = json_decode($passportResponse[Constants::RESPONSE_BODY], true)['access_token'];
@@ -115,8 +112,12 @@ class Interswitch {
         return $response;
     }
 
-    function getAuthData($publicCertPath, $version, $pan, $expDate, $cvv, $pin) {
+    function getAuthData($publicCertPath = null, $version, $pan, $expDate, $cvv, $pin) {
         $authDataCipher = $version . 'Z' . $pan . 'Z' . $pin . 'Z' . $expDate . 'Z' . $cvv;
+
+        if ($publicCertPath == null) {
+            $publicCertPath = '..\paymentgateway.crt';
+        }
 
         $fp = fopen($publicCertPath, "r");
         $pub_key = fread($fp, 8192);
@@ -127,6 +128,13 @@ class Interswitch {
         $authData = base64_encode($encryptedData);
 
         return $authData;
+    }
+
+    function getSecureData($publicCertPath, $pan, $expDate, $cvv, $pin) {
+        $secureData["SECURE"] = Constants::API_JAM_SECURE_DATA;
+        $secureData["PINBLOCK"] = Constants::API_JAM_SECURE_DATA;
+
+        return $secureData;
     }
 
     function getAccessToken() {
