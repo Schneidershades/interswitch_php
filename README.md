@@ -14,8 +14,10 @@ $ composer require Interswitch/Interswitch
 
 ```php
 <?php
+require_once __DIR__.'/vendor/autoload.php';
 
-use Interswitch\Interswitch;
+use Interswitch\Interswitch as Interswitch;
+
 
 // Initialize Interswitch object
 $CLIENT_ID = "IKIA9614B82064D632E9B6418DF358A6A4AEA84D7218";
