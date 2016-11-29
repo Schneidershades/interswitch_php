@@ -8,15 +8,9 @@
 
 namespace Interswitch;
 
-//set_include_path('/var/www/html/interswitch/lib');
-
 include_once __DIR__.'/lib/Utils.php';
 include_once __DIR__.'/lib/Constants.php';
 include_once __DIR__.'/lib/HttpClient.php';
-//include_once __DIR__.'/lib/Crypt/RSA.php';
-//include_once __DIR__.'/lib/Math/BigInteger.php';
-//use \Crypt_RSA;
-//use \Math_BigInteger;
 
 class Interswitch {
 
@@ -41,7 +35,7 @@ public function __construct($clientId, $clientSecret, $environment = null) {
 
 
 
-function send($uri, $httpMethod, $data = null, $headers = null, $signedParameters = null) 
+function send($uri, $httpMethod, $data = null, $headers = null, $signedParameters = null)
 {
 
   $this->nonce = Utils::generateNonce();
@@ -63,7 +57,7 @@ function send($uri, $httpMethod, $data = null, $headers = null, $signedParameter
       $uri = Constants::SANDBOX_BASE_URL . $uri;
     }
   }
-   
+
   $this->signature = Utils::generateSignature($this->clientId, $this->clientSecret, $uri, $httpMethod, $this->timestamp, $this->nonce, $signedParameters);
 
   $passportResponse = Utils::generateAccessToken($this->clientId, $this->clientSecret, $passportUrl);
@@ -74,7 +68,7 @@ function send($uri, $httpMethod, $data = null, $headers = null, $signedParameter
   }
 
   $authorization = 'Bearer ' . $this->accessToken;
-  
+
   $constantHeaders = [
     'Authorization: ' . $authorization,
     'SignatureMethod: ' . $this->signatureMethod,
@@ -123,7 +117,7 @@ function sendWithAccessToken($uri, $httpMethod, $accessToken, $data = null, $hea
       $uri = Constants::SANDBOX_BASE_URL . $uri;
     }
   }
-  
+
   $this->signature = Utils::generateSignature($this->clientId, $this->clientSecret, $uri, $httpMethod, $this->timestamp, $this->nonce, $signedParameters);
 
   $authorization = 'Bearer ' . $accessToken;
@@ -155,7 +149,7 @@ function sendWithAccessToken($uri, $httpMethod, $accessToken, $data = null, $hea
    $response = HttpClient::send($requestHeaders, $httpMethod, $uri, $data);
   }
   else {
-   //echo "<br>Headers is null";  
+   //echo "<br>Headers is null";
    $response = HttpClient::send($constantHeaders, $httpMethod, $uri, $data);
   }
 
@@ -167,37 +161,6 @@ function sendWithAccessToken($uri, $httpMethod, $accessToken, $data = null, $hea
 
 function getAuthData($pan, $expDate, $cvv, $pin, $publicModulus = null, $publicExponent = null) {
 
-  /*
-  if(is_null($publicModulus))
-  {
-    $publicModulus = Constants::PUBLICKEY_MODULUS;
-  }
-
-  if(is_null($publicExponent))
-  {
-    $publicExponent = Constants::PUBLICKEY_EXPONENT;
-  }
-
-  //echo 'Expo: ' . $publicExponent;
-  //echo 'Mod: ' . $publicModulus;
-
-  $authDataCipher = '1Z' . $pan . 'Z' . $pin . 'Z' . $expDate . 'Z' . $cvv;
-  $rsa = new Crypt_RSA();
-  $modulus = new Math_BigInteger($publicModulus, 16);
-  $exponent = new Math_BigInteger($publicExponent, 16);
-  $rsa->loadKey(array('n' => $modulus, 'e' => $exponent));
-  $rsa->setPublicKey();
-  $pub_key = $rsa->getPublicKey();
-
-  //echo 'Mod: ' . $modulus . '<br>';
-  //echo 'Exp: ' . $exponent . '<br>';
-  //echo 'RSA: ' . $rsa . '<br>';
-  //echo 'Pub Key: ' . $pub_key . '<br>';
-
-  openssl_public_encrypt($authDataCipher, $encryptedData, $pub_key);
-  $authData = base64_encode($encryptedData);
-   */
- 
   $authData = Utils::getAuthData($pan, $expDate, $cvv, $pin, $publicModulus, $publicExponent);
 
   return $authData;
@@ -205,18 +168,18 @@ function getAuthData($pan, $expDate, $cvv, $pin, $publicModulus = null, $publicE
 
 
 
-function getSecureData($pan, $expDate, $cvv, $pin, $amt, $msisdn, $ttid) 
+function getSecureData($pan, $expDate, $cvv, $pin, $amt, $msisdn, $ttid)
 {
   //echo "<br>Pin: " . $pin;
   //echo "<br>CVV: " . $cvv;
   //echo "<br>Exp Date: " . $expDate;
- 
+
   $options = array(
     'expiry' => $expDate,
     'pan' => $pan,
     'ttId' => $ttid,
     'amount' => $amt,
-    'mobile' => $msisdn   
+    'mobile' => $msisdn
   );
 
   $pinData = array(
@@ -230,7 +193,7 @@ function getSecureData($pan, $expDate, $cvv, $pin, $amt, $msisdn, $ttid)
  //echo "<br>Secure Data: " . $secure['secureData'];
  //echo "<br>Pin Block: " . $secure['pinBlock'];
  //echo "<br>Mac: " . $secure['mac'];
- 
+
  return $secure;
 }
 
