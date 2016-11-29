@@ -1,5 +1,5 @@
 {
-    "name": "Interswitch/Interswitch",
+    "name": "interswitch/interswitch",
     "type": "library",
     "description": "An Interswitch SDK.",
     "license": "ISC",
