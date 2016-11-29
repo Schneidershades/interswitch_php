@@ -6,9 +6,9 @@ namespace Interswitch;
  * Description of Utils
  *
  * @author Abiola.Adebanjo
- * @author Lekan.Omotayo
+ * @author Lekan.Omotayo 
  */
-include_once __DIR__.'/Constants.php';
+include_once 'Constants.php';
 include_once __DIR__.'/Crypt/RSA.php';
 include_once __DIR__.'/Math/BigInteger.php';
 include_once __DIR__.'/Crypt/TripleDES.php';
@@ -151,9 +151,9 @@ static function generateSecureData($options, $pinData)
     //echo "<br>Pin: " . $pinData['pin'];
     //echo "<br>CVV: " . $pinData['cvv'];
     //echo "<br>Exp Date: " . $expiry;
-
+    
     $pinKey = self::generateKey();
-
+    
     if(!empty($options['publicKeyModulus']))
     {
       $publicKeyModulus = $options['publicKeyModulus'];
@@ -172,13 +172,13 @@ static function generateSecureData($options, $pinData)
       'tPhoneNumber' => "",
       'productCode' => ""
     );
-
+    
     $billInfo = array(
       'phoneNumber' => "",
       'customerNumber' => "",
       'billCode' => ""
-    );
-
+    );  
+      
     $atmTranferInfo = array(
       'customerId' => "",
       'transferCode' => "",
@@ -220,10 +220,10 @@ static function generateSecureData($options, $pinData)
       $data = [
         'secureData' => $secureData,
         'pinBlock' => $pinBlock,
-        'mac' => $mac
+        'mac' => $mac 
       ];
 
-
+      
       return $data;
 }
 
@@ -249,7 +249,7 @@ static function generateSecureData($options, $pinData)
       $pinBlockStringLenLen = strlen($pinBlockStringLen);
       $clearPinBlock = $pinBlockStringLenLen . $pinBlockStringLen . $pinBlockString;
       //echo "<br>Clear Pin Block: " . $clearPinBlock;
-
+   
       $randomNumber = substr($randNum, 0, 1);
       //echo "<br>Rand: " . $randomNumber;
 
@@ -259,7 +259,7 @@ static function generateSecureData($options, $pinData)
       for ($i = 0; $i < $pinPadLen; $i++) {
         $clearPinBlock = $clearPinBlock . $randomNumber;
       }
-
+  
       //echo "<br>Clear Pin Block: " . $clearPinBlock;
       //echo "<br>Key: " . self::print_array($pinKey);
 
@@ -283,9 +283,9 @@ static function generateSecureData($options, $pinData)
    }
 
 
-   static function getMacData($app, $options)
+   static function getMacData($app, $options) 
    {
-
+    
     $macData = "";
     if (empty($app)) {
         return $macData;
@@ -375,7 +375,7 @@ static function generateSecureData($options, $pinData)
 
 
 
-   static function getSecure($options, $app, $isActivate = false)
+   static function getSecure($options, $app, $isActivate = false) 
    {
 
     //TODO Temporary Activate eCash
@@ -392,7 +392,7 @@ static function generateSecureData($options, $pinData)
     //echo "<br>Headerbytes-lenght : " . strlen($headerBytes);
     //echo "<br>Headerbytes : " . self::print_array($headerBytes);
     //echo '<br>Headers: '. $headerHex;
-
+    
     $formatVersionHex = $versionHex;
     $formatVersionBytes = pack("H*", $formatVersionHex);
     //echo "<br>formatVersionBytes-lenght : " . strlen($formatVersionBytes);
@@ -424,7 +424,7 @@ static function generateSecureData($options, $pinData)
         $customerIdLenLen = strlen($customerIdLen);
         $customerIdBlock = $customerIdLenLen . $customerIdLen . $customerId;
         $customerIdBlockLen = strlen($customerIdBlock);
- 	//echo "<br>Customer Id: " . $customerIdBlock;
+ 	//echo "<br>Customer Id: " . $customerIdBlock;      
 
         $maxLen = 20;
         $pandiff = $maxLen - $customerIdBlockLen;
@@ -532,7 +532,7 @@ static function print_array($var)
 }
 
 
-static function asc2bin($asc)
+static function asc2bin($asc) 
 {
   $result = '';
   $len = strlen($asc);
@@ -541,7 +541,7 @@ static function asc2bin($asc)
     if( ord ($asc[$i])  < 255)
     {
       //$result .=sprintf("%08b",ord($asc[$i]));
-      $result .= ord($asc[$i]);
+      $result .= ord($asc[$i]);  
     }
     else
     {
@@ -561,7 +561,7 @@ for ($i = 0; $i < $len; $i += 8)
 {
 $result .= chr(bindec(substr($bin,$i,8)));
 }
-return $result;
+return $result; 
 }
 */
 
@@ -584,7 +584,7 @@ static function hexDecode($data)
     while($i < $end && self::ignore($data[$i]))
     {
       $i++;
-    }
+    } 
 
     $b1 = self::decodingTable($data[$i++]);
     while($i < $end && self::ignore($data[$i]))
@@ -632,7 +632,7 @@ static function decodingTable($b)
   if($b == 'F')
     return '15';
 
-   return $b;
+   return $b;  
 }
 
 static function ignore($c)
