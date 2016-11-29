@@ -53,7 +53,7 @@ $respBody = $response["RESPONSE_BODY"];
 
 ## Third Party Packages
 
-- PHPSECLIB
+- phpseclib
 - JWT
 
 ## About
