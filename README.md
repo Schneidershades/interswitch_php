@@ -45,7 +45,9 @@ $data = array(
 $request = json_encode($data);
     
 // add records to the log
-$interswitchAPI->send("api/v2/purchases", "POST", $request);
+$response = $interswitchAPI->send("api/v2/purchases", "POST", $request);
+$httpRespCode = $response["HTTP_CODE"];
+$respBody = $response["RESPONSE_BODY"];
 ```
 
 
