@@ -25,8 +25,10 @@ class Interswitch {
   private $timestamp;
   const ENV_PRODUCTION = "PRODUCTION";
   const ENV_SANDBOX = "SANDBOX";
+  const ENV_DEV = "DEVELOPMENT";
 
 public function __construct($clientId, $clientSecret, $environment = null) {
+  
   $this->clientId = $clientId;
   $this->clientSecret = $clientSecret;
   if ($environment !== null) {
@@ -36,6 +38,35 @@ public function __construct($clientId, $clientSecret, $environment = null) {
 
 
 
+function getPassportUrl($env) {
+  if($env === null) return Constants::SANDBOX_BASE_URL.Constants::PASSPORT_RESOURCE_URL;
+
+  if($env === self::ENV_PRODUCTION){
+    return Constants::PRODUCTION_BASE_URL . Constants::PASSPORT_RESOURCE_URL;
+  }
+  else if($env === self::ENV_DEV){
+    return "http://172.26.40.117:6060/". Constants::PASSPORT_RESOURCE_URL;
+  }
+  else {
+    return Constants::SANDBOX_BASE_URL.Constants::PASSPORT_RESOURCE_URL;
+  }
+
+}
+
+function getUri($env, $uri) {
+  if($env === null) return Constants::SANDBOX_BASE_URL . $uri;
+
+  if($env === self::ENV_PRODUCTION){
+    return Constants::PRODUCTION_BASE_URL . $uri;
+  }
+  else if($env === self::ENV_DEV){
+    return Constants::DEV_BASE_URL . $uri;
+  }
+  else {
+    return Constants::SANDBOX_BASE_URL . $uri;
+  }
+}
+
 function send($uri, $httpMethod, $data = null, $headers = null, $signedParameters = null) 
 {
 
@@ -43,25 +74,13 @@ function send($uri, $httpMethod, $data = null, $headers = null, $signedParameter
   $this->timestamp = Utils::generateTimestamp();
   $this->signatureMethod = Constants::SIGNATURE_METHOD_VALUE;
 
-  if ($this->environment === NULL) {
-    $passportUrl = Constants::SANDBOX_BASE_URL . Constants::PASSPORT_RESOURCE_URL;
-    $uri = Constants::SANDBOX_BASE_URL . $uri;
-  } else {
-    if(strcmp($this->environment, self::ENV_PRODUCTION))
-    {
-      $passportUrl = Constants::PRODUCTION_BASE_URL . Constants::PASSPORT_RESOURCE_URL;
-      $uri = Constants::PRODUCTION_BASE_URL . $uri;
-    }
-    else
-    {
-      $passportUrl = Constants::SANDBOX_BASE_URL . Constants::PASSPORT_RESOURCE_URL;
-      $uri = Constants::SANDBOX_BASE_URL . $uri;
-    }
-  }
-   
+  $passportUrl = $this->getPassportUrl($this->environment);
+  $uri = $this->getUri($this->environment, $uri);
+
   $this->signature = Utils::generateSignature($this->clientId, $this->clientSecret, $uri, $httpMethod, $this->timestamp, $this->nonce, $signedParameters);
 
   $passportResponse = Utils::generateAccessToken($this->clientId, $this->clientSecret, $passportUrl);
+  
   if($passportResponse[Constants::HTTP_CODE] === 200) {
     $this->accessToken = json_decode($passportResponse[Constants::RESPONSE_BODY], true)['access_token'];
   } else {

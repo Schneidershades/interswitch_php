@@ -12,6 +12,7 @@ class Constants {
 
     const SANDBOX_BASE_URL = "https://sandbox.interswitchng.com/";
     const PRODUCTION_BASE_URL = "https://saturn.interswitchng.com/";
+    const DEV_BASE_URL = "http://172.25.20.56:9080/";
     const PASSPORT_RESOURCE_URL = "passport/oauth/token";
     const HTTP_CODE = "HTTP_CODE";
     const RESPONSE_BODY = "RESPONSE_BODY";
