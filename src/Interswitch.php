@@ -45,7 +45,7 @@ function getPassportUrl($env) {
     return Constants::PRODUCTION_BASE_URL . Constants::PASSPORT_RESOURCE_URL;
   }
   else if($env === self::ENV_DEV){
-    return "http://172.26.40.117:6060/". Constants::PASSPORT_RESOURCE_URL;
+    return "https://qa.interswitchng.com/". Constants::PASSPORT_RESOURCE_URL;
   }
   else {
     return Constants::SANDBOX_BASE_URL.Constants::PASSPORT_RESOURCE_URL;
